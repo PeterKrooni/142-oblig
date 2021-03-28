@@ -13,7 +13,7 @@ precipitation = []
 stationData = ([], [])
 
 # Network socket
-sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+sock = socket(AF_INET, SOCK_DGRAM)
 
 
 def main():

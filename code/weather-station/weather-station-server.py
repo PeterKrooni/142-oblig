@@ -45,7 +45,10 @@ def getWeatherStationData():
 
 
 def sendWeatherStationData():
-    clientData = (temperature.encode(), precipitation.encode())
-    stationOutData = clientData.encode()
-    size = sock.sendto(stationOutData, ("localhost", 5555))
+    clientData = str(temperature.encode(), precipitation.encode())
+    stationOutData = str(clientData.encode())
+    try:
+        size = sock.sendto(stationOutData, ("localhost", 5555))
+    except ConnectionError:
+        print(f"Error sendind weather station data from client. Connection error: "+ConnectionError)
     print(f"Sent {size} bytes to storage")

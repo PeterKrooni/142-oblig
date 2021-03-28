@@ -6,6 +6,7 @@ sock = socket(AF_INET, SOCK_DGRAM)
 # Station data
 stationData = [([], [])]
 
+
 def main():
     startServer()
 
@@ -24,8 +25,10 @@ def startServer():
 
 
 def pollStationUpdates():
-    for size in range (1, 72):
-        rawData = sock.recvfrom()
+    for size in range(1, 72):
+        try:
+            rawData = sock.recvfrom(size)
+        except ConnectionError:
+            print(f"Error receiving data from weather station. Connection error: "+ConnectionError)
         stationData.append(rawData.decode())
         print(f"Recived from weather station.")
-

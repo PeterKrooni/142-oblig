@@ -16,17 +16,6 @@ stationData = ([], [])
 sock = socket(AF_INET, SOCK_DGRAM)
 
 
-def main():
-    startClient()
-    # Constantly send data from weather station to server
-    while True:
-        getWeatherStationData()
-        sendWeatherStationData()
-
-        # delay for 5 seconds until next data collection
-        sleep(5)
-
-
 def startClient():
     station_1.turn_on()
 
@@ -34,21 +23,37 @@ def startClient():
 def getWeatherStationData():
     # Capture data for 72 hours
     # Note that the simulation interval is 1 second
+
     for _ in range(72):
         # Sleep for 1 second to wait for new weather data
         # to be simulated
-        sleep(1)
+
+        sleep(0.1) #denne gjør at alt tar veldig lang tid
+
         # Read new weather data and append it to the
         # corresponding list
         temperature.append(station_1.temperature)
+
         precipitation.append(station_1.rain)
 
+def sendWeatherInSmallChunks():
+    for i in range(len(temperature)):
+        print(f"tempWeatherStation:{temperature[i]}, precWeatherStation:{precipitation[i]}")
+        sock.sendto(str((temperature[i])).encode(), ("localhost", 5555))
+        sock.sendto(str((precipitation[i])).encode(), ("localhost", 5555))
 
-def sendWeatherStationData():
-    clientData = str(temperature.encode(), precipitation.encode())
-    stationOutData = str(clientData.encode())
-    try:
-        size = sock.sendto(stationOutData, ("localhost", 5555))
-    except ConnectionError:
-        print(f"Error sendind weather station data from client. Connection error: "+ConnectionError)
-    print(f"Sent {size} bytes to storage")
+    print("reeeeeeeeeeeeeeeee")
+
+
+def main():
+    startClient()
+    # Constantly send data from weather station to server
+    while True:
+        getWeatherStationData()
+        sendWeatherInSmallChunks()
+
+        # delay for 5 seconds until next data collection
+        sleep(5)
+
+if __name__ == '__main__':
+    main()

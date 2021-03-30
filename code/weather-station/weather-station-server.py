@@ -50,6 +50,7 @@ def main():
     # Constantly send data from weather station to server
     while True:
         getWeatherStationData()
+        sock.sendto("ok".encode(), ("localhost", 5555)) #signal that the station is ready to send new info
         sendWeatherInSmallChunks()
 
         # delay for 5 seconds until next data collection

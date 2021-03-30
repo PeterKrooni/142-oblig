@@ -36,7 +36,8 @@ def start_tcp_server():
     sockTCP.bind((IP_Address, TCP_Port))
     sockTCP.listen()
     conn, address = sockTCP.accept()
-    sleep(15)  # Initial sleep so that we have time to get data from weather station
+    while stationData:
+        sleep(1)# Initial sleep so that we have time to get data from weather station
     while True:
         sleep(1)        # Data polled from the connected client
         sentence = conn.recv(size).decode()
@@ -44,6 +45,8 @@ def start_tcp_server():
         # If something has been sent, sentence will not be empty
         if sentence == "give shit":
             send_weather_in_small_chunks(conn)
+        elif sentence == "give all shit":
+            send_all_storage(conn)
 
 
 def send_weather_in_small_chunks(conn):
@@ -55,21 +58,33 @@ def send_weather_in_small_chunks(conn):
         conn.send(str((temperature[i])).encode())
         conn.send(str((precipitation[i])).encode())
 
+def send_all_storage(conn):
+    for x in range(len(stationData)):
+        temperature = stationData[x][0]
+        precipitation = stationData[x][1]
+        for i in range(len(temperature)):
+
+            conn.send(str((temperature[i])).encode())
+            conn.send(str((precipitation[i])).encode())
+
 
 # Poll station updates from weather station through UDP connection
 def poll_station_updates():
     while(True):
-        temperature = []
-        precipitation = []
-        for i in range(72):
-            rawTemperature, address = sockUDP.recvfrom(size)
-            rawPrecipitation, address = sockUDP.recvfrom(size)
-            rawTemperature = rawTemperature.decode()
-            rawPrecipitation = rawPrecipitation.decode()
-            temperature.append(rawTemperature)
-            precipitation.append(rawPrecipitation)
-            #print(f"temp: {rawTemperature}, prec: {rawPrecipitation}")
-        stationData.append((temperature,precipitation))
+        ready, address = sockUDP.recvfrom(size)
+        if(ready.decode() == "ok"):
+            temperature = []
+            precipitation = []
+            for i in range(72):
+                rawTemperature, address = sockUDP.recvfrom(size)
+                rawPrecipitation, address = sockUDP.recvfrom(size)
+                rawTemperature = rawTemperature.decode()
+                rawPrecipitation = rawPrecipitation.decode()
+                temperature.append(rawTemperature)
+                precipitation.append(rawPrecipitation)
+                #print(f"temp: {rawTemperature}, prec: {rawPrecipitation}")
+            stationData.append((temperature,precipitation))
+            print("done")
 
 
 if __name__ == '__main__':

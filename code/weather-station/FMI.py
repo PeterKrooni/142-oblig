@@ -6,7 +6,7 @@ def main():
     server_address = ("localhost", 5556)
     sock.connect(server_address)
 
-    sentence = "give shit"
+    sentence = input("give shit or give all shit:\n")
 
     sock.send(sentence.encode())
 

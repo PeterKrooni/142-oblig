@@ -17,13 +17,18 @@ stationData = []
 
 
 def main():
-    startServer()
+    start_udp_server()
+    # Run station updates in the background inside another thread
+    x = threading.Thread(target=poll_station_updates)
+    x.start()
+    start_tcp_server()
 
 
-def startServer():
+def start_udp_server():
     # Reuse address
-    sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-    sock.bind(("localhost", 5555))
+    sockUDP.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
+    sockUDP.bind((IP_Address, UDP_Port))
+
 
 def start_tcp_server():
     # Setup TCP connection

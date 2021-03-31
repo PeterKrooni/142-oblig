@@ -36,7 +36,7 @@ def start_tcp_server():
     sockTCP.bind((IP_Address, TCP_Port))
     sockTCP.listen()
     conn, address = sockTCP.accept()
-    while stationData:
+    while not stationData:
         sleep(1)# Initial sleep so that we have time to get data from weather station
     while True:
         sleep(1)        # Data polled from the connected client
@@ -50,20 +50,30 @@ def start_tcp_server():
 
 
 def send_weather_in_small_chunks(conn):
+    print ("gay")
     # Get first indices of last items in temperature and precipitation lists
     temperature = stationData[-1][0]
     precipitation = stationData[-1][1]
+
+
+    t = str(temperature)
+    p = str(precipitation)
+    print(t)
+    tp = t+p
+    conn.send(tp.encode())
+    """"
     for i in range(len(temperature)):
         print(f"tempStorageToClient:{temperature[i]}, precStorageToClient:{precipitation[i]}")
         conn.send(str((temperature[i])).encode())
         conn.send(str((precipitation[i])).encode())
+    """
+
 
 def send_all_storage(conn):
     for x in range(len(stationData)):
         temperature = stationData[x][0]
         precipitation = stationData[x][1]
         for i in range(len(temperature)):
-
             conn.send(str((temperature[i])).encode())
             conn.send(str((precipitation[i])).encode())
 

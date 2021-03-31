@@ -1,6 +1,7 @@
 from socket import socket, AF_INET, SOCK_DGRAM, SOL_SOCKET, SO_REUSEADDR
 from time import sleep
 import threading
+import ast
 
 # Network sockets
 sockUDP = socket(AF_INET, SOCK_DGRAM)
@@ -10,7 +11,7 @@ sockTCP = socket()
 IP_Address = "localhost"
 UDP_Port = 5555
 TCP_Port = 5556
-size = 1024
+size = 10000
 
 # Station data
 stationData = []
@@ -37,68 +38,50 @@ def start_tcp_server():
     sockTCP.listen()
     conn, address = sockTCP.accept()
     while not stationData:
-        sleep(1)# Initial sleep so that we have time to get data from weather station
+        sleep(1)  # Initial sleep so that we have time to get data from weather station
     while True:
-        sleep(1)        # Data polled from the connected client
+        sleep(1)  # Data polled from the connected client
         sentence = conn.recv(size).decode()
         print(sentence)
         # If something has been sent, sentence will not be empty
-        if sentence == "give shit":
+        if sentence == "give last":
             send_weather_in_small_chunks(conn)
-        elif sentence == "give all shit":
+        elif sentence == "give all":
             send_all_storage(conn)
 
 
 def send_weather_in_small_chunks(conn):
-    print ("gay")
+    print("gay")
     # Get first indices of last items in temperature and precipitation lists
     temperature = stationData[-1][0]
     precipitation = stationData[-1][1]
 
+    print(f"tempClient:{temperature}\nprecClient:{precipitation}")
 
-    t = str(temperature)
-    p = str(precipitation)
-    print(t)
-    tp = t+p
-    conn.send(tp.encode())
-    """"
-    for i in range(len(temperature)):
-        print(f"tempStorageToClient:{temperature[i]}, precStorageToClient:{precipitation[i]}")
-        conn.send(str((temperature[i])).encode())
-        conn.send(str((precipitation[i])).encode())
-    """
+    temp = str(temperature)
+    prec = str(precipitation)
+    data = temp + prec
+    conn.send(data.encode())
 
 
 def send_all_storage(conn):
+    allData = ""
     for x in range(len(stationData)):
-        temperature = stationData[x][0]
-        precipitation = stationData[x][1]
-        for i in range(len(temperature)):
-            conn.send(str((temperature[i])).encode())
-            conn.send(str((precipitation[i])).encode())
-
+        allData = allData + str(stationData[x][0]) + str(stationData[x][1])
+    conn.send(allData.encode())
 
 # Poll station updates from weather station through UDP connection
 def poll_station_updates():
-    while(True):
-        ready, address = sockUDP.recvfrom(size)
-        if(ready.decode() == "ok"):
-            temperature = []
-            precipitation = []
-            for i in range(72):
-                rawTemperature, address = sockUDP.recvfrom(size)
-                rawPrecipitation, address = sockUDP.recvfrom(size)
-                rawTemperature = rawTemperature.decode()
-                rawPrecipitation = rawPrecipitation.decode()
-                temperature.append(rawTemperature)
-                precipitation.append(rawPrecipitation)
-                #print(f"temp: {rawTemperature}, prec: {rawPrecipitation}")
-            stationData.append((temperature,precipitation))
-            print("done")
+    while True:
+        rawData, address = sockUDP.recvfrom(size)
+        rawData = rawData.decode()
+        temperature = ast.literal_eval(rawData[:rawData.index(']') + 1])
+        precipitation = ast.literal_eval(rawData[rawData.index(']') + 1:])
+        print(temperature)
+        print(precipitation)
+        stationData.append((temperature, precipitation))
+        print("done")
 
 
 if __name__ == '__main__':
     main()
-
-
-

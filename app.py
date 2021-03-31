@@ -43,15 +43,7 @@ def handle_request():
     temperature.append([float(i) for i in temp1])
     precipitation.append([float(i) for i in prec1])
     print(temperature)
-    """
-    list(filter(lambda k: '\'' in k, temp))
-    li = list(temp.split(","))
-    print(f"list: {li}")
 
-    print(f"temp: {temp}")
-    print(temp[10])
-    print("temp updated")
-"""
 
 
     prec = (sock.recv(1024).decode())

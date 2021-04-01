@@ -1,7 +1,5 @@
 import matplotlib.pyplot as plt
-import threading
 import ast
-from time import sleep
 from io import BytesIO
 from flask import Flask, render_template, send_file, redirect, url_for, request
 from socket import socket
@@ -17,11 +15,13 @@ precipitation = []
 # Update interval for getting data from client
 interval = 1
 
+
 def init_socket():
     server_address = ("localhost", 5556)
     sock.connect(server_address)
-    sentence = "give shit"
+    sentence = "give last"
     sock.send(sentence.encode())
+
 
 @app.route('/')
 def hello_world():
@@ -30,31 +30,31 @@ def hello_world():
 
 @app.route('/', methods=['POST', 'GET'])
 def handle_request():
-    temperature = []
-    precipitation = []
+    # Send request to server
+    sentence = "give last"
+    sock.send(sentence.encode())
 
-    print("request recieved")
-    temp = (sock.recv(1024).decode())
-    temp1 = ast.literal_eval(temp[:temp.index(']')+1])
-    prec1 = ast.literal_eval(temp[temp.index(']')+1:])
-    print(temp1)
-    print(prec1)
+    # Clear station data
+    temperature.clear()
+    precipitation.clear()
 
-    temperature.append([float(i) for i in temp1])
-    precipitation.append([float(i) for i in prec1])
-    print(temperature)
+    # Get temperature and precipitation data
+    raw_data = (sock.recv(10000).decode())
+    # Split at first ] occurrence (since its a string of a list)
+    temperature_data = ast.literal_eval(raw_data[:raw_data.index(']') + 1])
+    precipitation_data = ast.literal_eval(raw_data[raw_data.index(']') + 1:])
 
+    # Convert all string data to float
+    temperature_float = [float(i) for i in temperature_data]
+    precipitation_float = [float(i) for i in precipitation_data]
 
+    # Add float data to station data
+    temperature.append(temperature_float)
+    precipitation.append(precipitation_float)
 
-    prec = (sock.recv(1024).decode())
-    for j in prec:
-        precipitation.append(float(j))
-
-    print(f"prec: {prec}")
-    precipitation.append(prec)
-    print("prec updated")
-
+    # Update plot
     main_plot()
+    # Return new page (currently only updating image so have to return new html site)
     return hello_world()
 
 
@@ -67,11 +67,26 @@ def main_plot():
 
 def get_main_image():
     """Rendering the scatter chart"""
-    plt.plot(temperature, color='red')
-    plt.plot(precipitation, color='blue')
-    plt.title('Look at this graph')
+    # Clear graphs from lot
+    plt.clf()
+
+    # Print all plots if temperature is longer than 1, or just first if contains 1 element
+    if len(temperature) > 1:
+        for i in range(0, len(temperature) - 1):
+            plt.plot(temperature[i], color='red')
+    elif len(temperature) == 1:
+        plt.plot(temperature[0], color='red')
+
+    if len(precipitation) > 1:
+        for i in range(0, len(precipitation) - 1):
+            plt.plot(precipitation[i], color='blue')
+    elif len(precipitation) == 1:
+        plt.plot(precipitation[0], color='blue')
+
+    plt.title('Temperature and precipitation for next 72 hours')
     plt.xlabel('Precipitation (blue), temperature (red)')
 
+    # Save plot as image
     img = BytesIO()
     plt.savefig(img)
     img.seek(0)
@@ -85,6 +100,5 @@ def main():
 
 if __name__ == '__main__':
     main()
-
 
 main()

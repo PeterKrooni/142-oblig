@@ -1,5 +1,6 @@
 from socket import socket
 
+
 def main():
     sock = socket()
     server_address = ("localhost", 5555)
@@ -9,6 +10,7 @@ def main():
     new_sentence = sock.recv(1024).decode()
     print(f"From Server: {new_sentence}")
     sock.close()
+
 
 if __name__ == '__main__':
     main()

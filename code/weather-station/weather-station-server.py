@@ -25,7 +25,7 @@ def getWeatherStationData():
     for _ in range(72):
         # Read new weather data and append it to the
         # corresponding list
-        sleep(0.05) # Accuracy and variance of data corresponds to how high sleep value is
+        sleep(0.06) # Accuracy and variance of data corresponds to how high sleep value is
         temperature.append(station_1.temperature)
 
         precipitation.append(station_1.rain)

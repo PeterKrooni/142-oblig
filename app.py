@@ -2,6 +2,7 @@ import os
 import threading
 from time import sleep
 
+import webbrowser
 import matplotlib.pyplot as plt
 import ast
 from io import BytesIO
@@ -138,6 +139,9 @@ def main():
     print("Running flask app. Open your web browser and enter http://localhost:5000/")
     sleep(0.4)
     print("-----------------------------------READY--------------------------------")
+    print("Here at FMI™ we are so kind and considerate that we open your web browser for you without asking!")
+    sleep(1)
+    webbrowser.open('http://localhost:5000/')
     app.run()
 
 

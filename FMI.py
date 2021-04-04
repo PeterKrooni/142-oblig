@@ -15,7 +15,7 @@ def main():
     mode = input("> Type "
                  + '\033[93m' + "'cli' " + '\033[0m'
                  + "or "
-                 + '\033[93m' + " 'web' " + '\033[0m')
+                 + '\033[93m' + "'web' " + '\033[0m')
 
     if mode == "web":
         print("web")

@@ -36,6 +36,9 @@ def handle_request():
     print ("Readings updated.")
     all_plot()
     print ("Plotted all.")
+    # matplotlib gets buggy if you try to plot two separate things
+    # in quick succession so dont remove this sleep
+    sleep(3)
     main_plot()
     print ("Plotted main.")
 
@@ -79,6 +82,7 @@ def update_all_readings():
         storage_log.append((temperature_float, precipitation_float))
 
     print ("readings updated.")
+
     print(storage_log)
 
 
@@ -100,12 +104,23 @@ def get_main_image():
 
 
 def get_all_image():
+    tempList = [x[0] for x in storage_log]
+    temp_list = []
+    for i in tempList:
+        temp_list = temp_list+i
+
+    precList = [x[1] for x in storage_log]
+    prec_list = []
+    for i in precList:
+        prec_list = prec_list+i
+    print(f"Temperatures in all: {prec_list}")
+
     if len (storage_log) > 0:
         # Storage log has a list of tuples containing (72 hours of temp, 72 hours of precipitation)
         # First items in storage log, temperature
-        plt.plot([x[0] for x in storage_log], color='red')
+        plt.plot(temp_list, color='red')
         # Second items in storage log, precipitation
-        plt.plot([x[1] for x in storage_log])
+        plt.plot(prec_list, color='blue')
 
     plt.title('Temperature and precipitation for all hours')
     plt.xlabel('Precipitation (blue), temperature (red)')

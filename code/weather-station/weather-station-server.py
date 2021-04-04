@@ -47,7 +47,7 @@ def main():
     while True:
         getWeatherStationData()
         # delay for 5 seconds until next data collection
-        sleep(10)
+        sleep(1)
 
 if __name__ == '__main__':
     main()

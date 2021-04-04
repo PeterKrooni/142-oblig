@@ -1,3 +1,4 @@
+import select
 from socket import socket, AF_INET, SOCK_DGRAM, SOL_SOCKET, SO_REUSEADDR
 from time import sleep
 import threading
@@ -41,13 +42,30 @@ def start_tcp_server():
         sleep(1)  # Initial sleep so that we have time to get data from weather station
     while True:
         sleep(1)  # Data polled from the connected client
-        sentence = conn.recv(size).decode()
-        print(sentence)
-        # If something has been sent, sentence will not be empty
-        if sentence == "give last":
-            send_weather_in_small_chunks(conn)
-        elif sentence == "give all":
-            send_all_storage(conn)
+        if not handle_client_tcp_death(conn):
+            sentence = conn.recv(size).decode()
+            print(sentence)
+            # If something has been sent, sentence will not be empty
+            if sentence == "give last":
+                send_weather_in_small_chunks(conn)
+            elif sentence == "give all":
+                send_all_storage(conn)
+        else:
+            break
+
+
+# Check if client connection is died a horrible death, if so restart
+def handle_client_tcp_death(conn):
+    try:
+        # Magic select wizardry http://docs.python.org/2/howto/sockets.html#non-blocking-sockets
+        select.select([conn, ], [conn], [], 5)
+        return False
+    except select.error:
+        print("Detected client death.")
+        conn.shutdown(2)
+        conn.close()
+        start_tcp_server()
+        return True
 
 
 def send_weather_in_small_chunks(conn):

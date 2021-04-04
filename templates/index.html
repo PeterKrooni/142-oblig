@@ -10,11 +10,15 @@
 <body onload="refresh">
 
 <div id="mid">
-    <img src="main.png" alt="Image">
+    <h1>Data from Bergen Weather Station</h1>
+
+    <img src="graph.png" alt="Image">
+
     <form action="" method="post">
-        <input type="submit" id="re" name="refresh" value="Refresh (takes a few seconds)" />
+        <input type="submit" id="re" name="refresh" value="REFRESH" />
     </form>
-    <img src="all.png" alt="Image">
+
+    <p>Made by FMI™</p>
 </div>
 
 </body>
@@ -23,13 +27,14 @@
         font-family: "Verdana";
     }
     #re{
-        background-color: aquamarine;
+        background-color: #97afcb;
         border-style: none;
         font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
         border-radius: 10px;
-        padding: 20px;
-        padding-left: 10px;
-        padding-right: 10px;
+        font-size: 24px;
+        padding: 25px;
+        padding-left: 15px;
+        padding-right: 15px;
     }
     #mid{
           display: flex;

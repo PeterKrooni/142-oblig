@@ -33,29 +33,15 @@ def handle_request():
     sock.send(sentence.encode())
 
     update_all_readings()
-    print ("Readings updated.")
-    all_plot()
-    print ("Plotted all.")
-    # matplotlib gets buggy if you try to plot two separate things
-    # in quick succession so dont remove this sleep
-    sleep(3)
-    main_plot()
-    print ("Plotted main.")
+    graph_plot()
 
     # Return new page (currently only updating image so have to return new html site)
     return hello_world()
 
 
-@app.route('/main.png')
-def main_plot():
-    """The view for rendering the scatter chart"""
-    img = get_main_image()
-    return send_file(img, mimetype='image/png', cache_timeout=0)
-
-
-@app.route('/all.png')
-def all_plot():
-    img = get_all_image()
+@app.route('/graph.png')
+def graph_plot():
+    img = get_plot()
     return send_file(img, mimetype='image/png', cache_timeout=0)
 
 
@@ -86,24 +72,30 @@ def update_all_readings():
     print(storage_log)
 
 
-def get_main_image():
-    if len (storage_log) > 0:
-        plt.plot(storage_log[len(storage_log)-1][0], color='red')    # temp
-        plt.plot(storage_log[len(storage_log)-1][1], color='blue')   # prec
-
-    plt.title('Temperature and precipitation for next 72 hours')
-    plt.xlabel('Precipitation (blue), temperature (red)')
-
-    # Save plot as image
+def get_plot():
+    plt.clf()
+    fig, (ax_72, ax_all) = plt.subplots(nrows=2)
+    fig.tight_layout(pad=5.0)
+    fig.set_figheight(8)
+    fig.set_figwidth(16)
+    get_72(ax_72)
+    get_all(ax_all)
     img = BytesIO()
     plt.savefig(img)
     img.seek(0)
-    # Clear graphs from plot
-    plt.clf()
     return img
 
 
-def get_all_image():
+def get_72(ax_72):
+    if len (storage_log) > 0:
+        ax_72.plot(storage_log[len(storage_log)-1][0], color='red')    # temp
+        ax_72.plot(storage_log[len(storage_log)-1][1], color='blue')   # prec
+    ax_72.set_ylabel('Temp(C), Prec (mm)')
+    ax_72.set_xlabel('Time (hours)')
+    ax_72.set_title('Precipitation (blue), Temperature (red) (72 hours)')
+
+
+def get_all(ax_all):
     tempList = [x[0] for x in storage_log]
     temp_list = []
     for i in tempList:
@@ -118,19 +110,12 @@ def get_all_image():
     if len (storage_log) > 0:
         # Storage log has a list of tuples containing (72 hours of temp, 72 hours of precipitation)
         # First items in storage log, temperature
-        plt.plot(temp_list, color='red')
+        ax_all.plot(temp_list, color='red')
         # Second items in storage log, precipitation
-        plt.plot(prec_list, color='blue')
-
-    plt.title('Temperature and precipitation for all hours')
-    plt.xlabel('Precipitation (blue), temperature (red)')
-
-    img = BytesIO()
-    plt.savefig(img)
-    img.seek(0)
-    # Clear graphs from plot
-    plt.clf()
-    return img
+        ax_all.plot(prec_list, color='blue')
+    ax_all.set_ylabel('Temp(C), Prec (mm)')
+    ax_all.set_xlabel('Time (hours)')
+    ax_all.set_title('Precipitation (blue), Temperature (red) (All time)')
 
 
 def main():

@@ -25,7 +25,7 @@ def getWeatherStationData():
     for _ in range(72):
         # Read new weather data and append it to the
         # corresponding list
-        sleep(0.4) # Accuracy and variance of data corresponds to how high sleep value is
+        sleep(0.05) # Accuracy and variance of data corresponds to how high sleep value is
         temperature.append(station_1.temperature)
 
         precipitation.append(station_1.rain)
@@ -37,8 +37,7 @@ def sendWeatherToStorage(temperature, precipitation):
 
     rawData = str(temperature)+str(precipitation)
     sock.sendto(rawData.encode(), ("localhost", 5555))
-    print (rawData)
-    print("reeeeeeeeeeeeeeeee")
+    print ("Station: Sending data to storage...")
 
 
 def main():

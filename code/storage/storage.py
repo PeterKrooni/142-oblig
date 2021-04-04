@@ -44,7 +44,6 @@ def start_tcp_server():
         sleep(1)  # Data polled from the connected client
         if not handle_client_tcp_death(conn):
             sentence = conn.recv(size).decode()
-            print(sentence)
             # If something has been sent, sentence will not be empty
             if sentence == "give last":
                 send_weather_in_small_chunks(conn)
@@ -69,12 +68,9 @@ def handle_client_tcp_death(conn):
 
 
 def send_weather_in_small_chunks(conn):
-    print("gay")
     # Get first indices of last items in temperature and precipitation lists
     temperature = stationData[-1][0]
     precipitation = stationData[-1][1]
-
-    print(f"tempClient:{temperature}\nprecClient:{precipitation}")
 
     temp = str(temperature)
     prec = str(precipitation)
@@ -95,10 +91,8 @@ def poll_station_updates():
         rawData = rawData.decode()
         temperature = ast.literal_eval(rawData[:rawData.index(']') + 1])
         precipitation = ast.literal_eval(rawData[rawData.index(']') + 1:])
-        print(temperature)
-        print(precipitation)
         stationData.append((temperature, precipitation))
-        print("done")
+        print("Storage: Received station update!")
 
 
 if __name__ == '__main__':

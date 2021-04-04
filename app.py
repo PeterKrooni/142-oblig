@@ -1,3 +1,5 @@
+import os
+import threading
 from time import sleep
 
 import matplotlib.pyplot as plt
@@ -66,10 +68,7 @@ def update_all_readings():
         precipitation_float = [float(i) for i in precipitation_data]
 
         storage_log.append((temperature_float, precipitation_float))
-
-    print ("readings updated.")
-
-    print(storage_log)
+    print ("Client readings updated from storage.")
 
 
 def get_plot():
@@ -105,7 +104,6 @@ def get_all(ax_all):
     prec_list = []
     for i in precList:
         prec_list = prec_list+i
-    print(f"Temperatures in all: {prec_list}")
 
     if len (storage_log) > 0:
         # Storage log has a list of tuples containing (72 hours of temp, 72 hours of precipitation)
@@ -119,8 +117,34 @@ def get_all(ax_all):
 
 
 def main():
+    """
+    Magic sleep numbers to make it seem like it's a complicated and sophisticated system
+    """
+    print("Starting storage and weather services...")
+    ws = threading.Thread(target=run_weather_station)
+    s = threading.Thread(target=run_storage)
+    ws.start()
+    s.start()
+    sleep(2)
+    print("Ready.")
+    sleep(0.5)
+    print("Starting client TCP connection to server...")
+    sleep(0.9)
     init_socket()
+    print("Connection ready.")
+    sleep(1.2)
+    print("Running flask app. Open your web browser and enter http://localhost:5000/")
+    sleep(0.4)
+    print("-----------------------------------READY--------------------------------")
     app.run()
+
+
+def run_weather_station():
+    os.system("python code/weather-station/weather-station-server.py")
+
+
+def run_storage():
+    os.system("python code/storage/storage.py")
 
 
 if __name__ == '__main__':

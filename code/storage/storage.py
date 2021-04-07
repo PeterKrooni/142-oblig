@@ -3,6 +3,7 @@ from socket import socket, AF_INET, SOCK_DGRAM, SOL_SOCKET, SO_REUSEADDR
 from time import sleep
 import threading
 import ast
+import os
 
 # Network sockets
 sockUDP = socket(AF_INET, SOCK_DGRAM)
@@ -16,14 +17,21 @@ size = 10000
 
 # Station data
 stationData = []
+storage_file = "storage.txt"
 
 
 def main():
+    make_storage_file()
     start_udp_server()
     # Run station updates in the background inside another thread
     x = threading.Thread(target=poll_station_updates)
     x.start()
     start_tcp_server()
+
+def make_storage_file():
+    # creates file if does not exist, overwrites content if there is any
+    with open(storage_file, "w") as file:
+        file.write("")
 
 
 def start_udp_server():
@@ -38,15 +46,16 @@ def start_tcp_server():
     sockTCP.bind((IP_Address, TCP_Port))
     sockTCP.listen()
     conn, address = sockTCP.accept()
-    while not stationData:
-        sleep(1)  # Initial sleep so that we have time to get data from weather station
+    with open(storage_file, "w+") as file:
+        while file.read() == "":
+            sleep(1)  # Initial sleep so that we have time to get data from weather station
     while True:
         sleep(1)  # Data polled from the connected client
         if not handle_client_tcp_death(conn):
             sentence = conn.recv(size).decode()
             # If something has been sent, sentence will not be empty
             if sentence == "give last":
-                send_weather_in_small_chunks(conn)
+                send_last_weather_data(conn)
             elif sentence == "give all":
                 send_all_storage(conn)
         else:
@@ -67,22 +76,23 @@ def handle_client_tcp_death(conn):
         return True
 
 
-def send_weather_in_small_chunks(conn):
-    # Get first indices of last items in temperature and precipitation lists
-    temperature = stationData[-1][0]
-    precipitation = stationData[-1][1]
-
-    temp = str(temperature)
-    prec = str(precipitation)
-    data = temp + prec
-    conn.send(data.encode())
+def send_last_weather_data(conn):
+    with open(storage_file, "r") as file:
+        line_list = file.readlines()
+        temp = line_list[-2]
+        prec = line_list[-1]
+        data = temp + prec
+        conn.send(data.encode())
 
 
 def send_all_storage(conn):
     allData = ""
-    for x in range(len(stationData)):
-        allData = allData + str(stationData[x][0]) + str(stationData[x][1])
+    with open(storage_file, "r") as file:
+        line_list = file.readlines()
+        for line in line_list:
+            allData = allData + line
     conn.send(allData.encode())
+
 
 # Poll station updates from weather station through UDP connection
 def poll_station_updates():
@@ -91,7 +101,9 @@ def poll_station_updates():
         rawData = rawData.decode()
         temperature = ast.literal_eval(rawData[:rawData.index(']') + 1])
         precipitation = ast.literal_eval(rawData[rawData.index(']') + 1:])
-        stationData.append((temperature, precipitation))
+        with open(storage_file, "a") as file:
+            file.write(str(temperature)+'\n')
+            file.write(str(precipitation)+'\n')
         print("Storage: Received station update!")
 
 

@@ -35,7 +35,6 @@ def getWeatherStationData():
 def sendWeatherToStorage(temperature, precipitation):
     rawData = str(temperature) + str(precipitation)
     sock.sendto(rawData.encode(), ("localhost", 5555))
-    print("Station: Sending data to storage...")
 
 
 def main():

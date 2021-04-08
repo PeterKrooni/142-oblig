@@ -99,7 +99,7 @@ def update_all_readings():
         precipitation_float = [float(i) for i in precipitation_data]
 
         storage_log.append((temperature_float, precipitation_float))
-    print ("Client readings updated from storage.")
+    print("Client readings updated from storage.")
 
 
 def list_to_string(raw_data):

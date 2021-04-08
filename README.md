@@ -7,7 +7,7 @@
 Main entry point of application is FMI.py
 There are two versions of the program available, CLI (command line interface) and Web (web browser based, using flask).
 
-###How to run:
+### How to run:
 1. Clone repository
 2. Install packages in requirements.txt (this can be done automatically when cloning the project into Intellij)
 3. Run FMI.py and follow the instructions in the console

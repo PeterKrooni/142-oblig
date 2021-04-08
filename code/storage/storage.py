@@ -16,7 +16,6 @@ TCP_Port = 5556
 size = 10000
 
 # Station data
-stationData = []
 storage_file = "storage.txt"
 
 
@@ -29,13 +28,25 @@ def main():
     start_tcp_server()
 
 def make_storage_file():
-    # creates file if does not exist, overwrites content if there is any
+    """
+    Creates a new file called storage.txt for storing all data received from the weather station.
+    If the files already exists it overwrites the content so that the file is empty.
+
+    :rtype: None
+    """
+
     with open(storage_file, "w") as file:
         file.write("")
 
 
 def start_udp_server():
-    # Reuse address
+    """
+    Initializes the UDP server and binds it to the port and ip address
+    UDP server connects with the weather station to receive data
+
+    :rtype: None
+    """
+
     sockUDP.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
     sockUDP.bind((IP_Address, UDP_Port))
 
@@ -46,14 +57,17 @@ def start_tcp_server():
     sockTCP.bind((IP_Address, TCP_Port))
     sockTCP.listen()
     conn, address = sockTCP.accept()
+
     with open(storage_file, "w+") as file:
         while file.read() == "":
             sleep(1)  # Initial sleep so that we have time to get data from weather station
+
     while True:
         sleep(1)  # Data polled from the connected client
         if not handle_client_tcp_death(conn):
+
+            # Receive a signal from the FMI client about what information to send
             sentence = conn.recv(size).decode()
-            # If something has been sent, sentence will not be empty
             if sentence == "give last":
                 send_last_weather_data(conn)
             elif sentence == "give all":
@@ -79,6 +93,7 @@ def handle_client_tcp_death(conn):
 def send_last_weather_data(conn):
     with open(storage_file, "r") as file:
         line_list = file.readlines()
+        # Gets the last two entries in the storage and sends them to the client
         temp = line_list[-2]
         prec = line_list[-1]
         data = temp + prec

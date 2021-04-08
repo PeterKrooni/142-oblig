@@ -57,7 +57,9 @@ def update_all_readings():
 
     while raw_data.find(']') > -1:  # find returns -1 when arg not found
         # Get all items in temperature list
-        temperature_data = ast.literal_eval(raw_data[:raw_data.index(']') + 1])
+        temperature_data = list_to_string(raw_data)
+
+        # Removes temperature list from the raw data
         raw_data = raw_data[raw_data.index(']') + 1:]
 
         # Get all items in precipitation list

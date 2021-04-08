@@ -35,24 +35,45 @@ def main():
 
         while (True):
             sentence = input("> type: give last or give all:\n")
+
+            # Sends signal to storage about whether we want the last data from storage or alle the data
             sock.send(sentence.encode())
 
             if sentence == "give last":
-                rawData = sock.recv(10000).decode()
-                temperatureData = ast.literal_eval(rawData[:rawData.index(']') + 1])
-                precipitationData = ast.literal_eval(rawData[rawData.index(']') + 1:])
-                print(f"tempClient:{temperatureData}\nprecClient:{precipitationData}")
-
+                print_last_data_from_storage(sock.recv(100000).decode())
             elif sentence == "give all":
-                rawData = sock.recv(1000000).decode()
-                num = 1
-                while rawData.find(']') > -1:
-                    temperatureData = ast.literal_eval(rawData[:rawData.index(']') + 1])
-                    rawData = rawData[rawData.index(']') + 1:]
-                    precipitationData = ast.literal_eval(rawData[:rawData.index(']') + 1])
-                    rawData = rawData[rawData.index(']') + 1:]
-                    print(f"tempClient{num}:{temperatureData}\nprecClient{num}:{precipitationData}")
-                    num += 1
+                print_all_data_from_storage(sock.recv(1000000).decode())
+
+
+def print_last_data_from_storage(rawData):
+    """
+    Takes a string of two lists containing temperature data and precipitation data and splits it into single lists
+    of temperature data and precipitation data. Then prints the lists to console
+
+    :rtype: None
+    """
+
+    temperatureData = ast.literal_eval(rawData[:rawData.index(']') + 1])
+    precipitationData = ast.literal_eval(rawData[rawData.index(']') + 1:])
+    print(f"tempClient:{temperatureData}\nprecClient:{precipitationData}")
+
+
+def print_all_data_from_storage(rawData):
+    """
+    Takes a string of multiple lists containing temperature data and precipitation data and splits it into single lists
+    of temperature data and precipitation data. Then prints the lists to console
+
+    :rtype: None
+    """
+
+    num = 1
+    while rawData.find(']') > -1:
+        temperatureData = ast.literal_eval(rawData[:rawData.index(']') + 1])
+        rawData = rawData[rawData.index(']') + 1:]
+        precipitationData = ast.literal_eval(rawData[:rawData.index(']') + 1])
+        rawData = rawData[rawData.index(']') + 1:]
+        print(f"tempClient{num}:{temperatureData}\nprecClient{num}:{precipitationData}")
+        num += 1
 
 
 def run_weather_station():

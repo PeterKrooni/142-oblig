@@ -9,13 +9,24 @@ station_1 = StationSimulator(simulation_interval=1)
 sock = socket(AF_INET, SOCK_DGRAM)
 
 
-def startClient():
+def start_client():
+    """
+    Starts the weather station for weather collection
+
+    :rtype: None
+    """
     station_1.turn_on()
 
 
-def getWeatherStationData():
+def collect_weather_station_data():
+    """
+    Collects the data generated from the weather station over the past 72 hours.
+
+    :rtype: None
+    """
+
     # Capture data for 72 hours
-    # Note that the simulation interval is 1 second
+    # Note that the simulation interval is 0.06 second
 
     # Two lists for temperature and precipitation
     temperature = []
@@ -29,19 +40,38 @@ def getWeatherStationData():
 
         precipitation.append(station_1.rain)
 
-    sendWeatherToStorage(temperature, precipitation)
+    # Sends the data collected over to storage
+    send_weather_to_storage(temperature, precipitation)
 
 
-def sendWeatherToStorage(temperature, precipitation):
+def send_weather_to_storage(temperature, precipitation):
+    """
+    Sends the temperature and the precipitation collected over the past 72 hours over to storage
+
+    :rtype: None
+    """
+
+    # Converts the temperature and precipitation lists to string and adds them after each other
     rawData = str(temperature) + str(precipitation)
+
+    # Converts the rawData to Bytes and sends it over to storage
     sock.sendto(rawData.encode(), ("localhost", 5555))
 
 
 def main():
-    startClient()
+    """
+    Starts the weather generation client and then constantly sends the generated data over to storage
+
+    :rtype: None
+    """
+
+    # Starts the weather station for data generation
+    start_client()
+
     # Constantly send data from weather station to server
     while True:
-        getWeatherStationData()
+        collect_weather_station_data()
+
         # delay for 1 second until next data collection
         sleep(1)
 

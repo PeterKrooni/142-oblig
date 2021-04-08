@@ -27,6 +27,7 @@ def main():
     x.start()
     start_tcp_server()
 
+
 def make_storage_file():
     """
     Creates a new file called storage.txt for storing all data received from the weather station.

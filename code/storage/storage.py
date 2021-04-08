@@ -53,6 +53,13 @@ def start_udp_server():
 
 
 def start_tcp_server():
+    """
+    Initializes TCP Server for connection with client
+    Sends storage in formats depending on sentence received from client
+
+    :rtype: None
+    """
+
     # Setup TCP connection
     sockTCP.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
     sockTCP.bind((IP_Address, TCP_Port))
@@ -77,8 +84,17 @@ def start_tcp_server():
             break
 
 
-# Check if client connection is died a horrible death, if so restart
 def handle_client_tcp_death(conn):
+    """
+    Checks if TCP connection is still connected
+
+    :return: true if client connection is dead, false if connection is still going
+    :rtype: bool
+    :param connection conn: TCP connection to check
+
+    :rtype: Boolean
+    """
+
     try:
         # Magic select wizardry http://docs.python.org/2/howto/sockets.html#non-blocking-sockets
         select.select([conn, ], [conn], [], 5)
@@ -92,6 +108,13 @@ def handle_client_tcp_death(conn):
 
 
 def send_last_weather_data(conn):
+    """
+    Sends latest entry in storage file
+
+    :param connection conn: TCP Connection to client
+    :rtype: None
+    """
+
     with open(storage_file, "r") as file:
         line_list = file.readlines()
         # Gets the last two entries in the storage and sends them to the client
@@ -102,6 +125,13 @@ def send_last_weather_data(conn):
 
 
 def send_all_storage(conn):
+    """
+    Sends all entries in storage file
+
+    :param connection conn: TCP Connection to client
+    :rtype: None
+    """
+
     allData = ""
     with open(storage_file, "r") as file:
         line_list = file.readlines()
@@ -110,8 +140,14 @@ def send_all_storage(conn):
     conn.send(allData.encode())
 
 
-# Poll station updates from weather station through UDP connection
 def poll_station_updates():
+    """
+    Poll station updates from weather station through UDP connection,
+    decodes station data and writes to storage log if received
+
+    :rtype: None
+    """
+
     while True:
         rawData, address = sockUDP.recvfrom(size)
         rawData = rawData.decode()

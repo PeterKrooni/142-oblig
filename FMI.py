@@ -29,7 +29,7 @@ def main():
         start_station_and_storage_threads()
         sock = init_socket_connection()
 
-        while (True):
+        while True:
             sentence = input("> type: give last or give all:\n")
 
             # Sends signal to storage about whether we want the last data from storage or alle the data
